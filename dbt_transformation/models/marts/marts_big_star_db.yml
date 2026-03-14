@@ -1,18 +1,163 @@
 version: 2
 
+#models:
+#  - name: dim_customers
+#    columns:
+#      - name: customer_id
+#        tests:
+#          - unique
+#          - not_null
+#      - name: email
+#        tests: 
+#          - not_null
+#      - name: city
+#        tests:
+#          - not_null
+#      - name: country
+#        tests:
+#          - not_null
+
 models:
-  - name: dim_customers
+
+  - name: fact_sales
+    description: "Churn prediction feature table with 21 features and target variable"
     columns:
       - name: customer_id
+        description: "Unique customer identifier"
         tests:
           - unique
           - not_null
-      - name: email
-        tests: 
-          - not_null
-      - name: city
+      
+      - name: orders_per_month
+        description: "Historical average order frequency per month"
         tests:
           - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+      
+      - name: total_spent
+        description: "Total customer lifetime value"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: avg_item_value
+        description: "Average purchase amount"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: max_item_value
+        description: "Maximum single purchase amount"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: stddev_item_value
+        description: "Standard deviation of purchase amounts"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: unique_products_purchased
+        description: "Number of unique products purchased"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: avg_product_rating
+        description: "Average rating of products purchased"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5
+      
+      - name: highest_product_rating
+        description: "Highest rating of any product purchased"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5
+      
+      - name: lowest_product_rating
+        description: "Lowest rating of any product purchased"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5
+      
+      - name: successful_orders
+        description: "Count of successfully delivered orders"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: canceled_orders
+        description: "Count of cancelled orders"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: cancellation_rate
+        description: "Percentage of orders that were cancelled"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+      
       - name: country
+        description: "Customer country"
         tests:
           - not_null
+      
+      - name: city
+        description: "Customer city"
+        tests:
+          - not_null
+      
+      - name: gender
+        description: "Customer gender"
+        tests:
+          - not_null
+      
+      - name: is_churned
+        description: "Target variable: 1 if churned, 0 if active"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: [0, 1]

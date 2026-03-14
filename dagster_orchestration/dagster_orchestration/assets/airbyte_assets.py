@@ -15,3 +15,4 @@ airbyte_assets_list = load_assets_from_airbyte_instance(
     workspace_id="62f3b256-f490-44c7-bd0f-5ba55c6735d2",
     key_prefix=["bigquery", "raw"],
 )
+

@@ -1,9 +1,9 @@
 version: 2
 
 sources:
-  - name: raw_data
+  - name: demo_raw_data
     database: end-to-end-de-project-485511
-    schema: raw_data
+    schema: demo_raw_data
     freshness:
       warn_after:
         count: 24
@@ -12,7 +12,83 @@ sources:
 
     tables:
       - name: customers
+        description: "Raw customer demographic data"
+        columns:
+          - name: customer_id
+            description: "Unique customer identifier"
+            tests:
+              - unique
+              - not_null
+          - name: first_name
+            description: "Customer first name"
+          - name: last_name
+            description: "Customer last name"
+          - name: email
+            description: "Customer email address"
+          - name: gender
+            description: "Customer gender"
+          - name: country
+            description: "Customer country"
+          - name: city
+            description: "Customer city"
+          - name: ip_address
+            description: "Customer IP address"
+      
       - name: orders
-      - name: products
+        description: "Raw order transaction data"
+        columns:
+          - name: order_id
+            description: "Unique order identifier"
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: "Foreign key to customer"
+            tests:
+              - not_null
+          - name: order_purchased_at
+            description: "Timestamp when customer purchased"
+          - name: order_approved_at
+            description: "Timestamp when order was approved"
+          - name: order_delivered_at
+            description: "Timestamp when order was delivered"
+          - name: status
+            description: "Current order status (pending, shipped, delivered, etc)"
+      
       - name: order_items
+        description: "Raw order items (products in each order)"
+        columns:
+          - name: order_item_id
+            description: "Unique order item identifier"
+          - name: order_id
+            description: "Foreign key to orders"
+            tests:
+              - not_null
+          - name: prod_id
+            description: "Foreign key to products"
+            tests:
+              - not_null
+          - name: product_price
+            description: "Price of product at time of purchase"
+      
+      - name: products
+        description: "Raw product master data"
+        columns:
+          - name: product_id
+            description: "Unique product identifier"
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Product name"
+          - name: category
+            description: "Product category"
+          - name: price
+            description: "Current product price"
+          - name: rating
+            description: "Product rating (0-5 or similar scale)"
+          - name: collection
+            description: "Product collection"
+          - name: availability
+            description: "Boolean: whether product is available"
       

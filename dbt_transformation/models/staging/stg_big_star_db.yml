@@ -1,38 +1,192 @@
 version: 2
 
+
 models:
   - name: stg_customers
+    description: "Staging layer for customer dimension data"
     columns:
       - name: customer_id
-        description: Unique ID to identify a customer
+        description: "Unique ID to identify a customer"
         tests:
           - unique
           - not_null
+      
+      - name: first_name
+        description: "Customer first name"
+        tests:
+          - not_null
+      
+      - name: last_name
+        description: "Customer last name"
+        tests:
+          - not_null
+      
+      - name: email
+        description: "Customer email address"
+        tests:
+          - not_null
+          - unique
+      
+      - name: gender
+        description: "Customer gender"
+        tests:
+          - not_null
+      
+      - name: country
+        description: "Customer country"
+        tests:
+          - not_null
+      
+      - name: city
+        description: "Customer city"
+        tests:
+          - not_null
+
   - name: stg_orders
+    description: "Staging layer for order transaction data"
     columns:
       - name: order_id
-        description: Unique ID for orders
+        description: "Unique ID for orders"
         tests:
           - unique
           - not_null
-      - name: order_status
-        description: Status of the order. Gets updated every time there's an update in the status 
-        tests:
-          - accepted_values:
-              arguments:
-                values:
-                  - "created"
-                  - "shipped"
-                  - "approved"
-                  - "canceled"
-                  - "invoiced"
-                  - "delivered"
-                  - "processing"
-                  - "unavailable"
+      
       - name: customer_id
-        description: Unique ID to identify a customer. This references the stg_customers model. 
+        description: "Unique ID to identify a customer. References stg_customers model"
         tests:
+          - not_null
           - relationships:
-              arguments:
-                to: ref('stg_customers')
-                field: customer_id
+              to: ref('stg_customers')
+              field: customer_id
+      
+      - name: order_purchased_at
+        description: "Timestamp when customer purchased"
+        tests:
+          - not_null
+      
+      - name: order_approved_at
+        description: "Timestamp when order was approved"
+        tests:
+          - not_null
+      
+      - name: order_delivered_at
+        description: "Timestamp when order was delivered"
+      
+      - name: status
+        description: "Status of the order. Gets updated every time there's an update in the status"
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - "created"
+                - "shipped"
+                - "approved"
+                - "canceled"
+                - "invoiced"
+                - "delivered"
+                - "processing"
+                - "unavailable"
+      
+      - name: order_date
+        description: "Standardized order date (approved_at or purchased_at)"
+        tests:
+          - not_null
+
+  - name: stg_order_items
+    description: "Staging layer for order items (products in each order)"
+    columns:
+      - name: order_id
+        description: "Foreign key to orders"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      
+      - name: order_item_id
+        description: "Unique order item identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: product_id
+        description: "Foreign key to products"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      
+      - name: product_price
+        description: "Price of product at time of purchase"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: quantity
+        description: "Quantity of items ordered (1 per row in this table)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+      
+      - name: item_total
+        description: "Total price for this item (product_price * quantity)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+  - name: stg_products
+    description: "Staging layer for product master data"
+    columns:
+      - name: product_id
+        description: "Unique product identifier"
+        tests:
+          - unique
+          - not_null
+      
+      - name: name
+        description: "Product name"
+        tests:
+          - not_null
+      
+      - name: category
+        description: "Product category (normalized to lowercase)"
+        tests:
+          - not_null
+      
+      - name: product_price
+        description: "Current product price"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      
+      - name: rating
+        description: "Product rating (0-5 scale)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: numeric
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 5
+      
+      - name: is_available
+        description: "Boolean: whether product is available (1 = available, 0 = unavailable)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: int64
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: [0, 1]

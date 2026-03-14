@@ -6,7 +6,7 @@ from dagster_airbyte import airbyte_resource, airbyte_sync_op
 resources = {
     "airbyte": airbyte_resource.configured(
         {
-            "host": "localhost",  # or your Airbyte server host
+            "host": "localhost",  
             "port": "8000",         # Airbyte API port
         }
     ),

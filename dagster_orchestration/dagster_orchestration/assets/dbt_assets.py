@@ -28,3 +28,5 @@ class CustomDagsterDbtTranslator(DagsterDbtTranslator):
 )
 def dbt_project_assets(context: AssetExecutionContext, dbt: DbtCliResource):
     yield from dbt.cli(["build"], context=context).stream()
+
+
